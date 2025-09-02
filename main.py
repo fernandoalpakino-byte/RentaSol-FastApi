@@ -8,6 +8,9 @@ from app.models import Usuario
 from app.database.database import engine
 from sqlmodel import Session, select
 
+# Routers
+from app.api.routers import reservas_router
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Función de ciclo de vida de la aplicación"""
@@ -22,6 +25,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Incluir routers
+app.include_router(reservas_router)
 
 @app.get("/")
 def read_root():
