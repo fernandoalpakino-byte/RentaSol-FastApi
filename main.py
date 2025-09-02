@@ -7,6 +7,11 @@ from contextlib import asynccontextmanager
 import uuid
 from fastapi import FastAPI
 
+
+
+def mierda():
+    pass
+
 def generate_uuid() -> str:
     return str(uuid.uuid4())
 
