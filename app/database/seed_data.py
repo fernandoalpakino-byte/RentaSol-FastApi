@@ -16,6 +16,7 @@ from app.models import (
     MesasReservadas
 )
 from app.database.database import engine
+from app.utils.security import hash_password
 
 def create_seed_data():
     """Crear datos de prueba en la base de datos"""
@@ -36,7 +37,7 @@ def create_seed_data():
                 ruc="20100066661",
                 correo="juan@restaurant.com",
                 telefono="+51987654321",
-                password="password123",  # En producción, usar hash!
+                password=hash_password("password123"),
                 tipousuario="propietario"
             ),
             Usuario(
@@ -45,7 +46,7 @@ def create_seed_data():
                 ruc="20100066662",
                 correo="maria@restaurant.com",
                 telefono="+51987654322",
-                password="password123",
+                password=hash_password("password123"),
                 tipousuario="propietario"
             ),
             Usuario(
@@ -54,7 +55,7 @@ def create_seed_data():
                 ruc=None,
                 correo="carlos@cliente.com",
                 telefono="+51987654323",
-                password="password123",
+                password=hash_password("password123"),
                 tipousuario="cliente"
             )
         ]

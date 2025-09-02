@@ -4,6 +4,7 @@ from app.models import Usuario
 from app.schemas.usuarios import UsuarioCreate, UsuarioRead, UsuarioUpdate
 from app.repositories.usuarios_repository import UsuariosRepository
 from datetime import datetime
+from app.utils.security import hash_password
 
 class UsuariosService:
     def __init__(self, session: Session):
@@ -16,7 +17,7 @@ class UsuariosService:
             ruc=payload.ruc,
             correo=payload.correo,
             telefono=payload.telefono,
-            password=payload.password,  # TODO: hash
+            password=hash_password(payload.password),
             tipousuario=payload.tipousuario,
         )
         usuario = self.repo.crear(usuario)
@@ -67,6 +68,9 @@ class UsuariosService:
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         data = payload.model_dump(exclude_unset=True)
+        if "password" in data:
+            # si en el futuro agregamos password en update schema
+            data["password"] = hash_password(data["password"])
         for k, v in data.items():
             setattr(usuario, k, v)
         usuario = self.repo.actualizar(usuario)
