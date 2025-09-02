@@ -9,7 +9,14 @@ from app.database.database import engine
 from sqlmodel import Session, select
 
 # Routers
-from app.api.routers import reservas_router, usuarios_router, restaurantes_router
+from app.api.routers import (
+    reservas_router,
+    usuarios_router,
+    restaurantes_router,
+    cartas_router,
+    platillos_router,
+    mesas_router,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,6 +37,9 @@ app = FastAPI(
 app.include_router(reservas_router)
 app.include_router(usuarios_router)
 app.include_router(restaurantes_router)
+app.include_router(cartas_router)
+app.include_router(platillos_router)
+app.include_router(mesas_router)
 
 @app.get("/")
 def read_root():
