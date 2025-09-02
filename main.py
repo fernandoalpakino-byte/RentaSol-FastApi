@@ -16,6 +16,7 @@ from app.api.routers import (
     cartas_router,
     platillos_router,
     mesas_router,
+    auth_router,
 )
 
 @asynccontextmanager
@@ -34,6 +35,7 @@ app = FastAPI(
 )
 
 # Incluir routers
+app.include_router(auth_router)
 app.include_router(reservas_router)
 app.include_router(usuarios_router)
 app.include_router(restaurantes_router)

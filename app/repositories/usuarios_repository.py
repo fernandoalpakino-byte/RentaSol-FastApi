@@ -18,6 +18,9 @@ class UsuariosRepository:
     def obtener_por_id(self, idusuario: str) -> Optional[Usuario]:
         return self.session.get(Usuario, idusuario)
 
+    def obtener_por_correo(self, correo: str) -> Optional[Usuario]:
+        return self.session.exec(select(Usuario).where(Usuario.correo == correo)).first()
+
     def actualizar(self, usuario: Usuario) -> Usuario:
         self.session.add(usuario)
         self.session.commit()
