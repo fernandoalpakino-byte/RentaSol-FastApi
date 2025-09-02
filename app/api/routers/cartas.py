@@ -5,11 +5,12 @@ from typing import List
 from app.database.database import get_session
 from app.schemas.cartas import CartaCreate, CartaRead
 from app.services.cartas_service import CartasService
+from app.api.deps.authz import require_roles
 
 router = APIRouter(prefix="/cartas", tags=["cartas"])
 
 @router.post("", response_model=CartaRead, status_code=status.HTTP_201_CREATED)
-def crear_carta(payload: CartaCreate, session: Session = Depends(get_session)):
+def crear_carta(payload: CartaCreate, session: Session = Depends(get_session), current_user=Depends(require_roles("propietario"))):
     return CartasService(session).crear(payload)
 
 @router.get("", response_model=List[CartaRead])
@@ -21,10 +22,10 @@ def obtener_carta(idcarta: str, session: Session = Depends(get_session)):
     return CartasService(session).obtener(idcarta)
 
 @router.put("/{idcarta}", response_model=CartaRead)
-def actualizar_carta(idcarta: str, payload: CartaCreate, session: Session = Depends(get_session)):
+def actualizar_carta(idcarta: str, payload: CartaCreate, session: Session = Depends(get_session), current_user=Depends(require_roles("propietario"))):
     return CartasService(session).actualizar(idcarta, payload)
 
 @router.delete("/{idcarta}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_carta(idcarta: str, session: Session = Depends(get_session)):
+def eliminar_carta(idcarta: str, session: Session = Depends(get_session), current_user=Depends(require_roles("propietario"))):
     CartasService(session).eliminar(idcarta)
     return None
