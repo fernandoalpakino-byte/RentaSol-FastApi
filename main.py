@@ -9,7 +9,7 @@ from app.database.database import engine
 from sqlmodel import Session, select
 
 # Routers
-from app.api.routers import reservas_router
+from app.api.routers import reservas_router, usuarios_router, restaurantes_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +28,8 @@ app = FastAPI(
 
 # Incluir routers
 app.include_router(reservas_router)
+app.include_router(usuarios_router)
+app.include_router(restaurantes_router)
 
 @app.get("/")
 def read_root():
@@ -38,18 +40,18 @@ def read_root():
         "status": "activo"
     }
 
-@app.post("/usuarios")
+@app.post("/usuarios-old")
 def create_usuario(usuario: Usuario):
-    """Crear un nuevo usuario"""
+    """Crear un nuevo usuario (legacy demo, usar /usuarios)"""
     with Session(engine) as session:
         session.add(usuario)
         session.commit()
         session.refresh(usuario)
         return usuario
 
-@app.get("/usuarios", response_model=List[Usuario])
+@app.get("/usuarios-old", response_model=List[Usuario])
 def get_usuarios():
-    """Obtener todos los usuarios"""
+    """Obtener todos los usuarios (legacy demo, usar /usuarios)"""
     with Session(engine) as session:
         usuarios = session.exec(select(Usuario)).all()
         return usuarios
