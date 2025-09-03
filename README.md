@@ -10,13 +10,15 @@ Sistema de gestión de restaurantes y reservas de mesas desarrollado con FastAPI
 - **Gestión de Mesas**: Capacidad, estado y códigos QR
 - **Sistema de Reservas**: Fechas, montos y estados
 - **Redes Sociales**: Enlaces a Facebook e Instagram
+- **Configuración Segura**: Variables de entorno para credenciales
 
 ## 🛠️ Tecnologías
 
 - **Backend**: FastAPI (Python)
 - **Base de Datos**: PostgreSQL
 - **ORM**: SQLModel (SQLAlchemy + Pydantic)
-- **Autenticación**: Sistema básico de usuarios
+- **Autenticación**: JWT con bcrypt
+- **Configuración**: Variables de entorno con Pydantic Settings
 
 ## 📋 Requisitos Previos
 
@@ -51,23 +53,83 @@ source renta-sol-fast-api-env/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. Configurar base de datos
+### 5. Configurar variables de entorno
+
+#### Opción A: Generar automáticamente (Recomendado)
+```bash
+python create_env.py
+```
+
+#### Opción B: Crear manualmente
+```bash
+# Copiar el archivo de ejemplo
+cp env.example .env
+
+# Editar el archivo .env con tus credenciales
+nano .env  # o usar tu editor preferido
+```
+
+### 6. Configurar base de datos
 - Crear base de datos PostgreSQL: `c-labs-demo`
 - Usuario: `postgres`
-- Contraseña: `123456789`
+- Contraseña: `123456789` (o la que configures en .env)
 - Puerto: `5432`
 
-### 6. Ejecutar la aplicación
+### 7. Ejecutar la aplicación
 ```bash
 python main.py
 ```
 
 La API estará disponible en: `http://localhost:8000`
 
+## 🔐 Configuración de Variables de Entorno
+
+### Variables Principales
+
+| Variable | Descripción | Valor por Defecto |
+|----------|-------------|-------------------|
+| `DB_HOST` | Host de la base de datos | `localhost` |
+| `DB_PORT` | Puerto de la base de datos | `5432` |
+| `DB_NAME` | Nombre de la base de datos | `c-labs-demo` |
+| `DB_USERNAME` | Usuario de la base de datos | `postgres` |
+| `DB_PASSWORD` | Contraseña de la base de datos | `123456789` |
+| `SECRET_KEY` | Clave secreta para JWT | Generada automáticamente |
+| `ALGORITHM` | Algoritmo de encriptación | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Expiración de tokens | `30` |
+| `ENVIRONMENT` | Entorno de ejecución | `development` |
+| `DEBUG` | Modo debug | `true` |
+
+### Configuración por Entorno
+
+#### Desarrollo
+```env
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=DEBUG
+```
+
+#### Producción
+```env
+ENVIRONMENT=production
+DEBUG=false
+LOG_LEVEL=WARNING
+SECRET_KEY=tu_clave_secreta_muy_segura
+```
+
+### Seguridad
+
+⚠️ **Importante**: 
+- Nunca subas el archivo `.env` al repositorio
+- Cambia las contraseñas por defecto
+- Usa claves secretas seguras en producción
+- El archivo `.env` ya está en `.gitignore`
+
 ## 📚 Documentación de la API
 
 - **Swagger UI**: `http://localhost:8000/docs`
 - **ReDoc**: `http://localhost:8000/redoc`
+- **Health Check**: `http://localhost:8000/health`
+- **Configuración**: `http://localhost:8000/config` (solo en desarrollo)
 
 ## 🗄️ Estructura del Proyecto
 
@@ -78,11 +140,16 @@ RentaSol-FastApi/
 │   ├── models/           # Modelos de base de datos
 │   ├── schemas/          # Esquemas de Pydantic
 │   ├── api/              # Endpoints de la API
+│   │   ├── routers/      # Rutas de la API
+│   │   └── deps/         # Dependencias (auth)
 │   ├── core/             # Configuración central
 │   ├── database/         # Configuración de BD y semillas
 │   ├── services/         # Lógica de negocio
-│   └── utils/            # Utilidades
+│   ├── repositories/     # Acceso a datos
+│   └── utils/            # Utilidades (JWT, seguridad)
 ├── main.py               # Archivo principal
+├── create_env.py         # Script para generar .env
+├── env.example           # Ejemplo de variables de entorno
 ├── requirements.txt       # Dependencias
 └── README.md
 ```
@@ -99,20 +166,49 @@ La aplicación incluye datos de prueba automáticos:
 
 ## 🔌 Endpoints Principales
 
-- `GET /` - Información de la API
-- `GET /health` - Estado de la API
+### Autenticación
+- `POST /auth/login` - Login de usuarios
+
+### Usuarios
 - `POST /usuarios` - Crear usuario
 - `GET /usuarios` - Listar usuarios
+
+### Restaurantes
+- `POST /restaurantes` - Crear restaurante (propietario)
+- `GET /restaurantes` - Listar restaurantes
+
+### Cartas
+- `POST /cartas` - Crear carta (propietario)
+- `GET /cartas` - Listar cartas
+
+### Platillos
+- `POST /platillos` - Crear platillo (Admin)
+- `GET /platillos` - Listar platillos
+- `PUT /platillos/{id}` - Actualizar platillo
+- `DELETE /platillos/{id}` - Eliminar platillo
+
+### Mesas
+- `POST /mesas` - Crear mesa (propietario)
+- `GET /mesas` - Listar mesas
+
+### Reservas
+- `POST /restaurantes/{id}/reservas` - Crear reserva (autenticado)
+
+### Sistema
+- `GET /` - Información de la API
+- `GET /health` - Estado de la API
+- `GET /config` - Configuración (solo desarrollo)
 
 ## 🚧 Próximas Funcionalidades
 
 - [ ] CRUD completo para todas las entidades
-- [ ] Sistema de autenticación JWT
 - [ ] Validaciones avanzadas
 - [ ] Tests unitarios
 - [ ] Documentación completa
 - [ ] Sistema de pagos
 - [ ] Notificaciones push
+- [ ] Docker y Docker Compose
+- [ ] CI/CD pipeline
 
 ## 🤝 Contribuir
 

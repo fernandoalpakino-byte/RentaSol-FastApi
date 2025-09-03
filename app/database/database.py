@@ -1,19 +1,18 @@
 from sqlmodel import create_engine, Session
 from sqlmodel import SQLModel
-import os
-from dotenv import load_dotenv
+from app.core.config import get_database_url, settings
 
-# Cargar variables de entorno
-load_dotenv()
-
-# Configuración de la base de datos
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+psycopg2://postgres:123456789@localhost:5432/c-labs-demo"
-)
+# Configuración de la base de datos usando el sistema centralizado
+DATABASE_URL = get_database_url()
 
 # Crear el motor de la base de datos
-engine = create_engine(DATABASE_URL, echo=True)
+# Solo mostrar SQL en modo debug
+engine = create_engine(
+    DATABASE_URL, 
+    echo=settings.app.debug,
+    pool_pre_ping=True,  # Verificar conexión antes de usar
+    pool_recycle=3600,   # Reciclar conexiones cada hora
+)
 
 def create_db_and_tables():
     """Crear todas las tablas en la base de datos"""

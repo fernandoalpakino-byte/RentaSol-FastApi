@@ -6,6 +6,7 @@ from typing import List
 from app.database import create_db_and_tables, create_seed_data
 from app.models import Usuario
 from app.database.database import engine
+from app.core.config import settings
 from sqlmodel import Session, select
 
 # Routers
@@ -28,10 +29,11 @@ async def lifespan(app: FastAPI):
 
 # Crear la aplicación FastAPI
 app = FastAPI(
-    title="RentaSol FastAPI",
+    title=settings.app.app_name,
     description="API para gestión de restaurantes y reservas de mesas",
-    version="1.0.0",
-    lifespan=lifespan
+    version=settings.app.app_version,
+    lifespan=lifespan,
+    debug=settings.app.debug
 )
 
 # Incluir routers
@@ -47,8 +49,9 @@ app.include_router(mesas_router)
 def read_root():
     """Endpoint raíz de la API"""
     return {
-        "message": "Bienvenido a RentaSol FastAPI",
-        "version": "1.0.0",
+        "message": f"Bienvenido a {settings.app.app_name}",
+        "version": settings.app.app_version,
+        "environment": settings.app.environment,
         "status": "activo"
     }
 
@@ -71,8 +74,43 @@ def get_usuarios():
 @app.get("/health")
 def health_check():
     """Verificar el estado de la API"""
-    return {"status": "healthy", "message": "API funcionando correctamente"}
+    return {
+        "status": "healthy", 
+        "message": "API funcionando correctamente",
+        "environment": settings.app.environment,
+        "version": settings.app.app_version
+    }
+
+@app.get("/config")
+def get_config():
+    """Obtener información de configuración (solo en desarrollo)"""
+    if settings.app.environment == "development":
+        return {
+            "database": {
+                "host": settings.database.host,
+                "port": settings.database.port,
+                "database": settings.database.database,
+                "username": settings.database.username,
+                # No mostrar la contraseña por seguridad
+            },
+            "jwt": {
+                "algorithm": settings.jwt.algorithm,
+                "access_token_expire_minutes": settings.jwt.access_token_expire_minutes,
+            },
+            "app": {
+                "name": settings.app.app_name,
+                "version": settings.app.app_version,
+                "environment": settings.app.environment,
+                "debug": settings.app.debug,
+            }
+        }
+    return {"message": "Configuración no disponible en producción"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app, 
+        host=settings.host, 
+        port=settings.port,
+        log_level=settings.log_level.lower()
+    )
